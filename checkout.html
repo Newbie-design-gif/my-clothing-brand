@@ -27,7 +27,7 @@
       <h1 tabindex="-1" id="success-title">Order placed — thank you!</h1>
       <p>This is a <strong>demo checkout</strong>, so no money moved and nothing will ship.</p>
       <p>Demo order number: <span class="order-id" id="order-id"></span></p>
-      <p>In the real store, the customer would now get an email, SMS and WhatsApp confirmation with tracking.</p>
+      <p>In the real store, the customer would now get an email and text confirmation with tracking.</p>
       <a class="btn btn-primary" href="shop.html">Continue shopping</a>
     </div>
 
@@ -43,31 +43,31 @@
             <h3>1 · Delivery address</h3>
             <div class="form-grid">
               <div class="field"><label for="f-name">Full name</label><input id="f-name" type="text" autocomplete="name" required></div>
-              <div class="field"><label for="f-phone">Mobile number</label><input id="f-phone" type="tel" inputmode="numeric" maxlength="10" autocomplete="tel" required></div>
-              <div class="field full"><label for="f-addr">Address (house no, street, area)</label><input id="f-addr" type="text" autocomplete="street-address" required></div>
-              <div class="field"><label for="f-pin">Pincode</label><input id="f-pin" type="text" inputmode="numeric" maxlength="6" autocomplete="postal-code" required></div>
+              <div class="field"><label for="f-phone">Phone number</label><input id="f-phone" type="tel" inputmode="numeric" maxlength="10" autocomplete="tel" placeholder="10 digits" required></div>
+              <div class="field full"><label for="f-addr">Street address (incl. apt/unit)</label><input id="f-addr" type="text" autocomplete="street-address" required></div>
+              <div class="field"><label for="f-pin">ZIP code</label><input id="f-pin" type="text" inputmode="numeric" maxlength="5" autocomplete="postal-code" required></div>
               <div class="field"><label for="f-city">City</label><input id="f-city" type="text" autocomplete="address-level2" required></div>
-              <div class="field full"><label for="f-state">State</label><input id="f-state" type="text" autocomplete="address-level1" required></div>
+              <div class="field full"><label for="f-state">State</label><input id="f-state" type="text" autocomplete="address-level1" placeholder="e.g. NY, CA, TX" required></div>
             </div>
           </div>
 
           <div class="checkout-section">
             <h3>2 · Payment method</h3>
             <label class="pay-option">
-              <input type="radio" name="pay" value="upi" checked>
-              <span><span class="pay-name">UPI</span><br><span class="pay-desc">Google Pay, PhonePe, Paytm or any UPI app (most popular in India)</span></span>
+              <input type="radio" name="pay" value="card" checked>
+              <span><span class="pay-name">Credit / debit card</span><br><span class="pay-desc">Visa, Mastercard, Amex, Discover — handled by the payment gateway, never stored on the site</span></span>
             </label>
             <label class="pay-option">
-              <input type="radio" name="pay" value="card">
-              <span><span class="pay-name">Credit / debit card</span><br><span class="pay-desc">Visa, Mastercard, RuPay — handled by the payment gateway, never stored on the site</span></span>
+              <input type="radio" name="pay" value="paypal">
+              <span><span class="pay-name">PayPal</span><br><span class="pay-desc">Pay with your PayPal balance or linked cards</span></span>
             </label>
             <label class="pay-option">
-              <input type="radio" name="pay" value="netbanking">
-              <span><span class="pay-name">Net banking</span><br><span class="pay-desc">All major Indian banks</span></span>
+              <input type="radio" name="pay" value="wallet">
+              <span><span class="pay-name">Apple Pay / Google Pay</span><br><span class="pay-desc">One-tap checkout on supported devices</span></span>
             </label>
             <label class="pay-option">
-              <input type="radio" name="pay" value="cod">
-              <span><span class="pay-name">Cash on delivery</span><br><span class="pay-desc">Pay in cash or by UPI when the order arrives</span></span>
+              <input type="radio" name="pay" value="bnpl">
+              <span><span class="pay-name">Klarna / Afterpay</span><br><span class="pay-desc">Buy now, pay later in 4 interest-free installments</span></span>
             </label>
           </div>
 
@@ -79,7 +79,7 @@
         <h3>Order summary</h3>
         <div id="co-items" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;"></div>
         <div id="co-summary"></div>
-        <p class="summary-note">Prices include all taxes</p>
+        <p class="summary-note">No customs or hidden fees at delivery</p>
       </aside>
     </div>
   </main>
@@ -102,14 +102,14 @@
           if (!p) return "";
           return '<div class="summary-row" style="font-size: 13.5px;"><span>' +
             p.name + " (" + i.size + ") × " + i.qty +
-            "</span><span>" + fmtINR(p.price * i.qty) + "</span></div>";
+            "</span><span>" + fmtMoney(p.price * i.qty) + "</span></div>";
         }).join("");
 
         var rows = "";
-        rows += '<div class="summary-row"><span>MRP total</span><span>' + fmtINR(s.mrpTotal) + "</span></div>";
-        rows += '<div class="summary-row discount"><span>Discount</span><span>−' + fmtINR(s.baseDiscount + s.couponOff) + "</span></div>";
-        rows += '<div class="summary-row"><span>Shipping</span><span>' + (s.shipping === 0 ? "FREE" : fmtINR(s.shipping)) + "</span></div>";
-        rows += '<div class="summary-row total"><span>Total payable</span><span>' + fmtINR(s.total) + "</span></div>";
+        rows += '<div class="summary-row"><span>MRP total</span><span>' + fmtMoney(s.mrpTotal) + "</span></div>";
+        rows += '<div class="summary-row discount"><span>Discount</span><span>−' + fmtMoney(s.baseDiscount + s.couponOff) + "</span></div>";
+        rows += '<div class="summary-row"><span>Shipping</span><span>' + (s.shipping === 0 ? "FREE" : fmtMoney(s.shipping)) + "</span></div>";
+        rows += '<div class="summary-row total"><span>Total payable</span><span>' + fmtMoney(s.total) + "</span></div>";
         document.getElementById("co-summary").innerHTML = rows;
       }
 
@@ -126,13 +126,13 @@
             document.getElementById(missing[0]).focus();
             return;
           }
-          if (!/^[6-9][0-9]{9}$/.test(document.getElementById("f-phone").value.trim())) {
-            showToast("Please enter a valid 10-digit mobile number");
+          if (!/^[0-9]{10}$/.test(document.getElementById("f-phone").value.replace(/[^0-9]/g, ""))) {
+            showToast("Please enter a valid 10-digit phone number");
             document.getElementById("f-phone").focus();
             return;
           }
-          if (!/^[1-9][0-9]{5}$/.test(document.getElementById("f-pin").value.trim())) {
-            showToast("Please enter a valid 6-digit pincode");
+          if (!/^[0-9]{5}$/.test(document.getElementById("f-pin").value.trim())) {
+            showToast("Please enter a valid 5-digit ZIP code");
             document.getElementById("f-pin").focus();
             return;
           }

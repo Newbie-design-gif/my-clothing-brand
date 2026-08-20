@@ -73,10 +73,10 @@
       };
 
       var PRICE_BUCKETS = [
-        { key: "0-999", label: "Under ₹1,000", test: function (p) { return p.price < 1000; } },
-        { key: "1000-1999", label: "₹1,000 – ₹1,999", test: function (p) { return p.price >= 1000 && p.price < 2000; } },
-        { key: "2000-2999", label: "₹2,000 – ₹2,999", test: function (p) { return p.price >= 2000 && p.price < 3000; } },
-        { key: "3000+", label: "₹3,000 and above", test: function (p) { return p.price >= 3000; } }
+        { key: "0-9", label: "Under $10", test: function (p) { return p.price < 10; } },
+        { key: "10-19", label: "$10 – $19.99", test: function (p) { return p.price >= 10 && p.price < 20; } },
+        { key: "20-29", label: "$20 – $29.99", test: function (p) { return p.price >= 20 && p.price < 30; } },
+        { key: "30+", label: "$30 and above", test: function (p) { return p.price >= 30; } }
       ];
 
       function uniq(arr) { return Array.from(new Set(arr)); }

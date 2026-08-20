@@ -61,8 +61,8 @@
             '<a class="card-name" href="product.html?id=' + p.id + '">' + p.name + "</a>" +
             '<span class="meta">Colour: ' + item.color + " · Size: " + item.size + "</span>" +
             '<div class="price-row">' +
-              '<span class="price">' + fmtINR(p.price * item.qty) + "</span>" +
-              '<span class="mrp">' + fmtINR(p.mrp * item.qty) + "</span>" +
+              '<span class="price">' + fmtMoney(p.price * item.qty) + "</span>" +
+              '<span class="mrp">' + fmtMoney(p.mrp * item.qty) + "</span>" +
               '<span class="off">(' + discountPct(p) + "% off)</span>" +
             "</div>" +
           "</div>" +
@@ -90,13 +90,13 @@
         document.getElementById("cart-list").innerHTML = s.items.map(itemRow).join("");
 
         var rows = "";
-        rows += '<div class="summary-row"><span>MRP total</span><span>' + fmtINR(s.mrpTotal) + "</span></div>";
-        rows += '<div class="summary-row discount"><span>Discount on MRP</span><span>−' + fmtINR(s.baseDiscount).slice(0) + "</span></div>";
+        rows += '<div class="summary-row"><span>MRP total</span><span>' + fmtMoney(s.mrpTotal) + "</span></div>";
+        rows += '<div class="summary-row discount"><span>Discount on MRP</span><span>−' + fmtMoney(s.baseDiscount).slice(0) + "</span></div>";
         if (s.couponOff > 0) {
-          rows += '<div class="summary-row discount"><span>Coupon</span><span>−' + fmtINR(s.couponOff) + "</span></div>";
+          rows += '<div class="summary-row discount"><span>Coupon</span><span>−' + fmtMoney(s.couponOff) + "</span></div>";
         }
-        rows += '<div class="summary-row"><span>Shipping</span><span>' + (s.shipping === 0 ? "FREE" : fmtINR(s.shipping)) + "</span></div>";
-        rows += '<div class="summary-row total"><span>Total</span><span>' + fmtINR(s.total) + "</span></div>";
+        rows += '<div class="summary-row"><span>Shipping</span><span>' + (s.shipping === 0 ? "FREE" : fmtMoney(s.shipping)) + "</span></div>";
+        rows += '<div class="summary-row total"><span>Total</span><span>' + fmtMoney(s.total) + "</span></div>";
         document.getElementById("summary-rows").innerHTML = rows;
 
         var msg = document.getElementById("coupon-msg");

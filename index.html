@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vawehall — Contemporary Indian Wardrobe</title>
-  <meta name="description" content="Vawehall — contemporary Indian wardrobe staples. Kurtas, tees, dresses and denim, made responsibly and delivered anywhere in India.">
+  <meta name="description" content="Vawehall — contemporary wardrobe staples made in India. Kurtas, tees, dresses and denim, delivered across the United States.">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🧵</text></svg>">
   <style>
@@ -40,7 +40,7 @@
         <div>
           <p class="eyebrow">New season · Made in India</p>
           <h1>Clothes you'll live in, <em>not just like.</em></h1>
-          <p class="lede">Wardrobe staples in honest fabrics — hand-block kurtas, heavyweight tees and denim that breaks in beautifully. Free shipping above ₹999, easy 7-day exchanges.</p>
+          <p class="lede">Wardrobe staples in honest fabrics — hand-block kurtas, heavyweight tees and denim that breaks in beautifully. Free US shipping above $50, easy 7-day exchanges.</p>
           <div class="hero-ctas">
             <a class="btn btn-primary" href="shop.html">Shop everything</a>
             <a class="btn btn-outline" href="shop.html?badge=New">New arrivals</a>
@@ -121,10 +121,10 @@
         PRODUCTS.filter(function (p) { return p.badge === "Bestseller"; }).slice(0, 4).map(renderCard).join("");
 
       var props = [
-        { icon: ICONS.truck, h: "Free shipping above ₹999", p: "Pan-India delivery in 3–7 days, tracked at every step." },
-        { icon: ICONS.swap, h: "7-day easy exchange", p: "Wrong size? Doorstep pickup and a fresh piece, no questions." },
-        { icon: ICONS.shield, h: "Secure payments", p: "UPI, cards, net banking and wallets — fully encrypted." },
-        { icon: ICONS.rupee, h: "Cash on delivery", p: "Prefer to pay at the door? COD available across India." }
+        { icon: ICONS.truck, h: "Free US shipping above $50", p: "Delivery across the United States in 5–10 business days, tracked at every step." },
+        { icon: ICONS.swap, h: "7-day easy exchange", p: "Wrong size? We email you a return label and ship a fresh piece, no questions." },
+        { icon: ICONS.shield, h: "Secure checkout", p: "Cards, PayPal, Apple Pay and Klarna — fully encrypted." },
+        { icon: ICONS.check, h: "Made responsibly in India", p: "Small-batch production, honest fabrics, fair pricing." }
       ];
       document.getElementById("props").innerHTML = props.map(function (x) {
         return '<div class="prop">' + x.icon + "<div><h4>" + x.h + "</h4><p>" + x.p + "</p></div></div>";

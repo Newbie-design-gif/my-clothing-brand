@@ -1,5 +1,7 @@
 # Vawehall — Online Clothing Store (Starter Project)
 
+A clothing brand made in India, selling to customers in the **USA** — all prices in US dollars; a real payment gateway (Stripe/PayPal) gets integrated by the developer at the end.
+
 This repository contains everything needed to kick off a Myntra-style online store for a clothing brand:
 
 1. **A working starter website** (this folder) — a front-end demo storefront you can open in any browser: homepage, shop with filters and search, product pages with size charts, wishlist, cart, coupons, and a demo checkout. No installation needed.
@@ -22,7 +24,7 @@ python3 -m http.server 8000
 ### Demo notes
 
 - The cart and wishlist are saved in your browser (localStorage) — they survive page reloads.
-- Working demo coupon codes: `WELCOME10` (10% off above ₹999) and `FREESHIP`.
+- Working demo coupon codes: `WELCOME10` (10% off above $50) and `FREESHIP`.
 - Checkout is a **demo** — no payments happen, no data leaves your browser. Never enter real card details.
 - Product images are drawn placeholder illustrations — replace them with real photography (see `docs/`).
 

@@ -8,18 +8,26 @@
 const BRAND = "VAWEHALL";
 const CART_KEY = "vw_cart";
 const WISH_KEY = "vw_wish";
-const FREE_SHIP_ABOVE = 999;
-const SHIP_FEE = 79;
+
+/* Currency shown across the site. To sell in rupees instead, set
+   symbol "₹", locale "en-IN" — and adjust the amounts below to match. */
+const CURRENCY = { symbol: "$", locale: "en-US" };
+const FREE_SHIP_ABOVE = 50;
+const SHIP_FEE = 4.99;
 
 const COUPONS = {
-  WELCOME10: { kind: "pct", value: 10, min: 999, label: "10% off on orders above ₹999" },
+  WELCOME10: { kind: "pct", value: 10, min: 50, label: "10% off on orders above $50" },
   FREESHIP: { kind: "ship", label: "Free shipping on any order" }
 };
 
 /* ---------- tiny helpers ---------- */
 
-function fmtINR(n) {
-  return "₹" + Math.round(n).toLocaleString("en-IN");
+function fmtMoney(n) {
+  const cents = Math.round(n * 100) % 100 !== 0;
+  return CURRENCY.symbol + n.toLocaleString(CURRENCY.locale, {
+    minimumFractionDigits: cents ? 2 : 0,
+    maximumFractionDigits: 2
+  });
 }
 
 function readJSON(key, fallback) {
@@ -68,18 +76,20 @@ function cartSummary(couponCode) {
       couponMsg = "Coupon not recognised.";
     } else if (c.kind === "pct") {
       if (saleTotal >= c.min) {
-        couponOff = Math.round(saleTotal * c.value / 100);
+        couponOff = Math.round(saleTotal * c.value) / 100;
         couponOk = true;
         couponMsg = code + " applied — " + c.label + ".";
       } else {
-        couponMsg = code + " needs a minimum order of " + fmtINR(c.min) + ".";
+        couponMsg = code + " needs a minimum order of " + fmtMoney(c.min) + ".";
       }
     } else if (c.kind === "ship") {
       couponOk = true;
       couponMsg = code + " applied — " + c.label + ".";
     }
   }
-  let shipping = saleTotal === 0 ? 0 : (saleTotal - couponOff >= FREE_SHIP_ABOVE ? 0 : SHIP_FEE);
+  // Free-shipping threshold applies to the bag subtotal, before coupons —
+  // matches the "free shipping above $50" promise in the banner.
+  let shipping = saleTotal === 0 ? 0 : (saleTotal >= FREE_SHIP_ABOVE ? 0 : SHIP_FEE);
   if (couponOk && code === "FREESHIP") shipping = 0;
   return {
     items: cart,
@@ -132,7 +142,7 @@ function renderHeader() {
   const act = (k) => (nav === k ? ' class="active"' : "");
   mount.innerHTML =
     '<a class="skip-link" href="#main">Skip to content</a>' +
-    '<div class="announce">Free shipping above <strong>₹999</strong> · Easy 7-day returns &amp; size exchange · COD available</div>' +
+    '<div class="announce">Free US shipping above <strong>$50</strong> · Easy 7-day returns &amp; size exchange · Secure checkout</div>' +
     '<header class="site-header">' +
       '<div class="header-inner">' +
         '<a class="wordmark" href="index.html">VAWE<span>HALL</span></a>' +
@@ -168,7 +178,7 @@ function renderFooter() {
       '<div class="footer-inner">' +
         '<div class="footer-brand">' +
           '<span class="wordmark">VAWE<span>HALL</span></span>' +
-          "<p>Contemporary Indian wardrobe staples — made responsibly, priced honestly, delivered anywhere in India.</p>" +
+          "<p>Contemporary wardrobe staples, made responsibly in India — priced honestly, delivered across the United States.</p>" +
         "</div>" +
         '<div class="footer-col"><h5>Shop</h5><ul>' +
           '<li><a href="shop.html?category=Men">Men</a></li>' +
@@ -190,7 +200,7 @@ function renderFooter() {
       "</div>" +
       '<div class="footer-base">' +
         "<span>© 2026 " + BRAND + " · Starter demo storefront</span>" +
-        "<span>UPI · Cards · Net banking · COD</span>" +
+        "<span>Cards · PayPal · Apple Pay · Klarna</span>" +
       "</div>" +
     "</footer>";
 }
@@ -240,8 +250,8 @@ function renderCard(p) {
           '<span class="card-fabric">' + p.fabric + "</span>" +
           ratingChip(p) +
           '<div class="price-row">' +
-            '<span class="price">' + fmtINR(p.price) + "</span>" +
-            '<span class="mrp">' + fmtINR(p.mrp) + "</span>" +
+            '<span class="price">' + fmtMoney(p.price) + "</span>" +
+            '<span class="mrp">' + fmtMoney(p.mrp) + "</span>" +
             '<span class="off">(' + discountPct(p) + "% off)</span>" +
           "</div>" +
         "</div>" +

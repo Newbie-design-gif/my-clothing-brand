@@ -1,6 +1,8 @@
 # Developer Scope — Vawehall Online Clothing Store
 
-This folder is the complete requirements document for building a Myntra-style online store for a single clothing brand in India. Hand this whole folder to your developer — it is the answer to "what exactly do you want built?"
+This folder is the complete requirements document for building a Myntra-style online store for a single clothing brand. Hand this whole folder to your developer — it is the answer to "what exactly do you want built?"
+
+> **⚠️ Market update:** the business now targets **USA customers** (prices in US dollars; payment gateway to be integrated at the end). Documents 01–14 were written for the India market — most still apply, but read **[document 15, the USA-Market Addendum](15-usa-market-addendum.md)** alongside them: where they conflict (payments, shipping, taxes, legal, marketing channels), the addendum wins.
 
 ## How to read these documents
 
@@ -26,7 +28,8 @@ This folder is the complete requirements document for building a Myntra-style on
 | 12 | [Multi-channel inventory sync](12-multi-channel-inventory-sync.md) | 34 | 17 |
 | 13 | [Settlements & unit economics](13-settlements-unit-economics.md) | 42 | 30 |
 | 14 | [Daily operations & soft launch](14-daily-operations-soft-launch.md) | 60 | 45 |
-| | **Total** | **1028** | **637** |
+| 15 | [**USA-Market Addendum** (overrides where in conflict)](15-usa-market-addendum.md) | 155 | 115 |
+| | **Total** | **1,183** | **752** |
 
 ## Expert caveats — read these first
 
