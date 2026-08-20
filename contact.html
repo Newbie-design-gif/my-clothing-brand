@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact — Vawehall</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🧵</text></svg>">
+</head>
+<body data-nav="contact">
+  <div id="app-header"></div>
+
+  <main class="page-wrap">
+    <p class="eyebrow">We're listening</p>
+    <h1>Contact us</h1>
+    <p class="page-sub">Questions about an order, a size, or a return — we reply within one working day.</p>
+
+    <h2>Reach us directly</h2>
+    <ul>
+      <li><strong>WhatsApp / phone:</strong> +91-XXXXX-XXXXX (Mon–Sat, 10am–7pm IST)</li>
+      <li><strong>Email:</strong> care@vawehall.com</li>
+      <li><strong>Registered address:</strong> Vawehall — add your registered business address here (required by Indian e-commerce rules)</li>
+      <li><strong>Grievance officer:</strong> Name and contact to be added (required under the Consumer Protection E-Commerce Rules, 2020)</li>
+    </ul>
+
+    <h2>Or send a message</h2>
+    <div class="demo-note"><strong>Demo mode:</strong> this form shows the layout only — your developer will connect it to email/WhatsApp or a helpdesk tool.</div>
+    <form id="contact-form" novalidate>
+      <div class="form-grid">
+        <div class="field"><label for="c-name">Your name</label><input id="c-name" type="text" required></div>
+        <div class="field"><label for="c-email">Email</label><input id="c-email" type="email" required></div>
+        <div class="field full"><label for="c-topic">Topic</label>
+          <select id="c-topic">
+            <option>Order status</option>
+            <option>Return or exchange</option>
+            <option>Size help</option>
+            <option>Bulk / corporate order</option>
+            <option>Something else</option>
+          </select>
+        </div>
+        <div class="field full"><label for="c-msg">Message</label><textarea id="c-msg" required></textarea></div>
+      </div>
+      <p style="margin-top: 16px;"><button class="btn btn-primary" type="submit">Send message (demo)</button></p>
+    </form>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <script src="js/products.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      document.getElementById("contact-form").addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        var name = document.getElementById("c-name").value.trim();
+        var email = document.getElementById("c-email").value.trim();
+        var msg = document.getElementById("c-msg").value.trim();
+        if (!name || !email || !msg) { showToast("Please fill in your name, email and message"); return; }
+        showToast("Thanks " + name + "! In the live store this would reach our support inbox.");
+        this.reset();
+      });
+    });
+  </script>
+</body>
+</html>

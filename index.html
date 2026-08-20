@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vawehall — Contemporary Indian Wardrobe</title>
+  <meta name="description" content="Vawehall — contemporary Indian wardrobe staples. Kurtas, tees, dresses and denim, made responsibly and delivered anywhere in India.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🧵</text></svg>">
+  <style>
+    .hero-collage { display: flex; gap: 18px; align-items: center; justify-content: center; }
+    .hero-tile {
+      position: relative;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px 14px;
+      width: 148px;
+      box-shadow: var(--shadow);
+    }
+    .hero-tile svg { height: 150px; width: auto; margin: 0 auto; }
+    .hero-tile:nth-child(1) { transform: rotate(-5deg) translateY(14px); }
+    .hero-tile:nth-child(3) { transform: rotate(5deg) translateY(14px); }
+    .hero-tile:nth-child(2) { width: 168px; z-index: 1; }
+    .hero-tile .tile-tag { text-align: center; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-top: 10px; }
+    @media (max-width: 560px) {
+      .hero-collage { gap: 10px; }
+      .hero-tile { width: auto; flex: 1 1 0; min-width: 0; padding: 12px 8px; }
+      .hero-tile:nth-child(2) { width: auto; flex: 1.15 1 0; }
+      .hero-tile svg { height: auto; max-height: 112px; }
+    }
+  </style>
+</head>
+<body data-nav="home">
+  <div id="app-header"></div>
+
+  <main>
+    <section class="hero">
+      <div class="hero-inner">
+        <div>
+          <p class="eyebrow">New season · Made in India</p>
+          <h1>Clothes you'll live in, <em>not just like.</em></h1>
+          <p class="lede">Wardrobe staples in honest fabrics — hand-block kurtas, heavyweight tees and denim that breaks in beautifully. Free shipping above ₹999, easy 7-day exchanges.</p>
+          <div class="hero-ctas">
+            <a class="btn btn-primary" href="shop.html">Shop everything</a>
+            <a class="btn btn-outline" href="shop.html?badge=New">New arrivals</a>
+          </div>
+        </div>
+        <div class="hero-art">
+          <div class="hero-collage" id="hero-collage" aria-hidden="true"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Shop by edit</p>
+          <h2 class="section-title">Where do you want to start?</h2>
+        </div>
+        <div class="cat-grid" id="cat-grid"></div>
+      </div>
+    </section>
+
+    <section class="section shaded">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Just dropped</p>
+          <h2 class="section-title">New arrivals</h2>
+          <a class="see-all" href="shop.html?badge=New">See all new arrivals →</a>
+        </div>
+        <div class="product-grid" id="new-grid"></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Customer favourites</p>
+          <h2 class="section-title">Bestsellers, on repeat</h2>
+          <a class="see-all" href="shop.html?badge=Bestseller">See all bestsellers →</a>
+        </div>
+        <div class="product-grid" id="best-grid"></div>
+      </div>
+    </section>
+
+    <section class="section shaded">
+      <div class="container">
+        <div class="props" id="props"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <script src="js/products.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      document.getElementById("hero-collage").innerHTML =
+        '<div class="hero-tile">' + svgFor("Kurta", "Mustard") + '<div class="tile-tag">Kurtas</div></div>' +
+        '<div class="hero-tile">' + svgFor("Dress", "Rani Pink") + '<div class="tile-tag">Dresses</div></div>' +
+        '<div class="hero-tile">' + svgFor("Hoodie", "Indigo") + '<div class="tile-tag">Hoodies</div></div>';
+
+      var cats = [
+        { title: "Men", sub: "Tees, shirts, kurtas & denim", art: svgFor("Shirt", "Indigo"), href: "shop.html?category=Men" },
+        { title: "Women", sub: "Dresses, kurtas & co-ords", art: svgFor("Dress", "Rani Pink"), href: "shop.html?category=Women" },
+        { title: "Unisex", sub: "Hoodies, tees & layers for all", art: svgFor("Hoodie", "Olive"), href: "shop.html?category=Unisex" },
+        { title: "New In", sub: "This week's fresh drops", art: svgFor("Kurta", "Teal"), href: "shop.html?badge=New" }
+      ];
+      document.getElementById("cat-grid").innerHTML = cats.map(function (c) {
+        return '<a class="cat-tile" href="' + c.href + '">' +
+          '<div class="cat-art" aria-hidden="true">' + c.art + "</div>" +
+          "<h3>" + c.title + "</h3><p>" + c.sub + "</p>" +
+          '<span class="cat-cta">Shop now →</span></a>';
+      }).join("");
+
+      document.getElementById("new-grid").innerHTML =
+        PRODUCTS.filter(function (p) { return p.badge === "New"; }).slice(0, 4).map(renderCard).join("");
+      document.getElementById("best-grid").innerHTML =
+        PRODUCTS.filter(function (p) { return p.badge === "Bestseller"; }).slice(0, 4).map(renderCard).join("");
+
+      var props = [
+        { icon: ICONS.truck, h: "Free shipping above ₹999", p: "Pan-India delivery in 3–7 days, tracked at every step." },
+        { icon: ICONS.swap, h: "7-day easy exchange", p: "Wrong size? Doorstep pickup and a fresh piece, no questions." },
+        { icon: ICONS.shield, h: "Secure payments", p: "UPI, cards, net banking and wallets — fully encrypted." },
+        { icon: ICONS.rupee, h: "Cash on delivery", p: "Prefer to pay at the door? COD available across India." }
+      ];
+      document.getElementById("props").innerHTML = props.map(function (x) {
+        return '<div class="prop">' + x.icon + "<div><h4>" + x.h + "</h4><p>" + x.p + "</p></div></div>";
+      }).join("");
+    });
+  </script>
+</body>
+</html>

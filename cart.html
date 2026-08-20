@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopping Bag — Vawehall</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🧵</text></svg>">
+</head>
+<body data-nav="cart">
+  <div id="app-header"></div>
+
+  <main class="container">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="index.html">Home</a><span class="sep">/</span><span>Shopping bag</span>
+    </nav>
+
+    <div class="empty-note" id="cart-empty" hidden>
+      <p class="big">Your bag is empty</p>
+      <p>Everything you add ends up here — start with our bestsellers.</p>
+      <p style="margin-top: 16px;"><a class="btn btn-primary" href="shop.html">Start shopping</a></p>
+    </div>
+
+    <div class="cart-layout" id="cart-layout" hidden>
+      <section>
+        <h1 class="section-title" style="font-size: 28px; margin-bottom: 18px;" id="bag-title" tabindex="-1">Shopping bag</h1>
+        <div class="cart-list" id="cart-list"></div>
+      </section>
+
+      <aside class="summary-card" aria-label="Price details">
+        <h3>Price details</h3>
+        <div class="coupon-box">
+          <input type="text" id="coupon-input" placeholder="Coupon code" aria-label="Coupon code">
+          <button class="btn btn-dark" id="apply-coupon" type="button" style="padding: 9px 16px;">Apply</button>
+        </div>
+        <p class="coupon-msg" id="coupon-msg" role="status"></p>
+        <p class="coupon-hint">Try demo codes: WELCOME10 · FREESHIP</p>
+        <div id="summary-rows"></div>
+        <a class="btn btn-primary btn-block" href="checkout.html" id="checkout-btn">Proceed to checkout</a>
+        <p class="summary-note">Safe and secure payments · 7-day easy exchange</p>
+      </aside>
+    </div>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <script src="js/products.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    (function () {
+      function currentCoupon() { return sessionStorage.getItem("vw_coupon") || ""; }
+
+      function itemRow(item) {
+        var p = getProduct(item.id);
+        if (!p) return "";
+        var key = item.id + "|" + item.size + "|" + item.color;
+        return '<div class="cart-item" data-key="' + key + '">' +
+          '<a class="cart-thumb" href="product.html?id=' + p.id + '">' + svgFor(p.type, item.color) + "</a>" +
+          '<div class="cart-item-info">' +
+            '<span class="card-brand">' + BRAND + "</span>" +
+            '<a class="card-name" href="product.html?id=' + p.id + '">' + p.name + "</a>" +
+            '<span class="meta">Colour: ' + item.color + " · Size: " + item.size + "</span>" +
+            '<div class="price-row">' +
+              '<span class="price">' + fmtINR(p.price * item.qty) + "</span>" +
+              '<span class="mrp">' + fmtINR(p.mrp * item.qty) + "</span>" +
+              '<span class="off">(' + discountPct(p) + "% off)</span>" +
+            "</div>" +
+          "</div>" +
+          '<div class="cart-item-right">' +
+            '<div class="qty-stepper" role="group" aria-label="Quantity">' +
+              '<button type="button" data-step="-1" aria-label="Decrease quantity">−</button>' +
+              '<span class="qty">' + item.qty + "</span>" +
+              '<button type="button" data-step="1" aria-label="Increase quantity">+</button>' +
+            "</div>" +
+            '<button class="remove-btn" type="button" data-remove="' + key + '">Remove</button>' +
+          "</div>" +
+        "</div>";
+      }
+
+      function render() {
+        var s = cartSummary(currentCoupon());
+        var empty = s.items.length === 0;
+        document.getElementById("cart-empty").hidden = !empty;
+        document.getElementById("cart-layout").hidden = empty;
+        if (empty) return;
+
+        var n = s.items.reduce(function (a, i) { return a + i.qty; }, 0);
+        document.getElementById("bag-title").textContent =
+          "Shopping bag (" + n + (n === 1 ? " item)" : " items)");
+        document.getElementById("cart-list").innerHTML = s.items.map(itemRow).join("");
+
+        var rows = "";
+        rows += '<div class="summary-row"><span>MRP total</span><span>' + fmtINR(s.mrpTotal) + "</span></div>";
+        rows += '<div class="summary-row discount"><span>Discount on MRP</span><span>−' + fmtINR(s.baseDiscount).slice(0) + "</span></div>";
+        if (s.couponOff > 0) {
+          rows += '<div class="summary-row discount"><span>Coupon</span><span>−' + fmtINR(s.couponOff) + "</span></div>";
+        }
+        rows += '<div class="summary-row"><span>Shipping</span><span>' + (s.shipping === 0 ? "FREE" : fmtINR(s.shipping)) + "</span></div>";
+        rows += '<div class="summary-row total"><span>Total</span><span>' + fmtINR(s.total) + "</span></div>";
+        document.getElementById("summary-rows").innerHTML = rows;
+
+        var msg = document.getElementById("coupon-msg");
+        msg.textContent = s.couponMsg;
+        msg.className = "coupon-msg " + (s.couponMsg ? (s.couponOk ? "ok" : "err") : "");
+      }
+
+      document.addEventListener("click", function (ev) {
+        var rm = ev.target.closest("[data-remove]");
+        if (rm) {
+          var key = rm.getAttribute("data-remove").split("|");
+          setCart(getCart().filter(function (i) {
+            return !(i.id === key[0] && i.size === key[1] && i.color === key[2]);
+          }));
+          showToast("Removed from bag");
+          render();
+          // The clicked button was destroyed by the re-render — park focus on the bag title.
+          var title = document.getElementById("bag-title");
+          if (title && !document.getElementById("cart-layout").hidden) title.focus();
+          return;
+        }
+        var step = ev.target.closest("[data-step]");
+        if (step) {
+          var row = step.closest(".cart-item");
+          var rowKey = row.getAttribute("data-key");
+          var stepDir = step.getAttribute("data-step");
+          var k = rowKey.split("|");
+          var cart = getCart();
+          var item = cart.find(function (i) { return i.id === k[0] && i.size === k[1] && i.color === k[2]; });
+          if (!item) return;
+          item.qty += parseInt(stepDir, 10);
+          if (item.qty <= 0) cart.splice(cart.indexOf(item), 1);
+          setCart(cart);
+          render();
+          // Restore keyboard focus to the same +/− button in the re-rendered row.
+          var again = document.querySelector('.cart-item[data-key="' + rowKey.replace(/"/g, '\\"') + '"] [data-step="' + stepDir + '"]');
+          if (again) again.focus();
+          return;
+        }
+        if (ev.target.id === "apply-coupon") {
+          var code = document.getElementById("coupon-input").value.trim().toUpperCase();
+          sessionStorage.setItem("vw_coupon", code);
+          render();
+        }
+      });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById("coupon-input").value = currentCoupon();
+        render();
+        document.getElementById("checkout-btn").addEventListener("click", function (ev) {
+          if (getCart().length === 0) { ev.preventDefault(); }
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

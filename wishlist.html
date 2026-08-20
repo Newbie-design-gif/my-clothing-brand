@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wishlist — Vawehall</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🧵</text></svg>">
+</head>
+<body data-nav="wishlist">
+  <div id="app-header"></div>
+
+  <main class="container">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="index.html">Home</a><span class="sep">/</span><span>Wishlist</span>
+    </nav>
+
+    <section class="section" style="padding-top: 24px;">
+      <div class="section-head">
+        <p class="eyebrow">Saved for later</p>
+        <h1 class="section-title" id="wish-title">My wishlist</h1>
+      </div>
+
+      <div class="empty-note" id="wish-empty" hidden>
+        <p class="big">Your wishlist is empty</p>
+        <p>Tap the ♡ on any product to save it here for later.</p>
+        <p style="margin-top: 16px;"><a class="btn btn-primary" href="shop.html">Discover products</a></p>
+      </div>
+
+      <div class="product-grid" id="wish-grid"></div>
+    </section>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <script src="js/products.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    function renderWishlist() {
+      var ids = getWish();
+      var list = ids.map(getProduct).filter(Boolean);
+      document.getElementById("wish-empty").hidden = list.length !== 0;
+      document.getElementById("wish-grid").innerHTML = list.map(renderCard).join("");
+      document.getElementById("wish-title").textContent =
+        list.length ? "My wishlist (" + list.length + ")" : "My wishlist";
+    }
+    /* Re-render when a heart is toggled on this page; the toggled card is gone,
+       so move keyboard focus to the next card's heart (or the empty-state CTA). */
+    window.onWishChange = function () {
+      renderWishlist();
+      var next = document.querySelector("#wish-grid [data-wish]") ||
+                 document.querySelector("#wish-empty a");
+      if (next) next.focus();
+    };
+    document.addEventListener("DOMContentLoaded", renderWishlist);
+  </script>
+</body>
+</html>

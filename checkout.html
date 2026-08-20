@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout — Vawehall</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🧵</text></svg>">
+</head>
+<body data-nav="cart">
+  <div id="app-header"></div>
+
+  <main class="container">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="index.html">Home</a><span class="sep">/</span>
+      <a href="cart.html">Shopping bag</a><span class="sep">/</span><span>Checkout</span>
+    </nav>
+
+    <div class="empty-note" id="co-empty" hidden>
+      <p class="big">Nothing to check out</p>
+      <p>Your bag is empty — add something you love first.</p>
+      <p style="margin-top: 16px;"><a class="btn btn-primary" href="shop.html">Start shopping</a></p>
+    </div>
+
+    <div class="order-success" id="co-success" hidden>
+      <svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m8 12.5 2.8 2.8L16 9.5"/></svg>
+      <h1 tabindex="-1" id="success-title">Order placed — thank you!</h1>
+      <p>This is a <strong>demo checkout</strong>, so no money moved and nothing will ship.</p>
+      <p>Demo order number: <span class="order-id" id="order-id"></span></p>
+      <p>In the real store, the customer would now get an email, SMS and WhatsApp confirmation with tracking.</p>
+      <a class="btn btn-primary" href="shop.html">Continue shopping</a>
+    </div>
+
+    <div class="checkout-layout" id="co-layout" hidden>
+      <section>
+        <h1 class="section-title" style="font-size: 28px; margin-bottom: 18px;">Checkout</h1>
+        <div class="demo-note">
+          <strong>Demo mode:</strong> this form doesn't charge anyone or store data anywhere — it exists to show your developer the checkout flow to build. Do not enter real card details anywhere in this demo.
+        </div>
+
+        <form id="co-form" novalidate>
+          <div class="checkout-section">
+            <h3>1 · Delivery address</h3>
+            <div class="form-grid">
+              <div class="field"><label for="f-name">Full name</label><input id="f-name" type="text" autocomplete="name" required></div>
+              <div class="field"><label for="f-phone">Mobile number</label><input id="f-phone" type="tel" inputmode="numeric" maxlength="10" autocomplete="tel" required></div>
+              <div class="field full"><label for="f-addr">Address (house no, street, area)</label><input id="f-addr" type="text" autocomplete="street-address" required></div>
+              <div class="field"><label for="f-pin">Pincode</label><input id="f-pin" type="text" inputmode="numeric" maxlength="6" autocomplete="postal-code" required></div>
+              <div class="field"><label for="f-city">City</label><input id="f-city" type="text" autocomplete="address-level2" required></div>
+              <div class="field full"><label for="f-state">State</label><input id="f-state" type="text" autocomplete="address-level1" required></div>
+            </div>
+          </div>
+
+          <div class="checkout-section">
+            <h3>2 · Payment method</h3>
+            <label class="pay-option">
+              <input type="radio" name="pay" value="upi" checked>
+              <span><span class="pay-name">UPI</span><br><span class="pay-desc">Google Pay, PhonePe, Paytm or any UPI app (most popular in India)</span></span>
+            </label>
+            <label class="pay-option">
+              <input type="radio" name="pay" value="card">
+              <span><span class="pay-name">Credit / debit card</span><br><span class="pay-desc">Visa, Mastercard, RuPay — handled by the payment gateway, never stored on the site</span></span>
+            </label>
+            <label class="pay-option">
+              <input type="radio" name="pay" value="netbanking">
+              <span><span class="pay-name">Net banking</span><br><span class="pay-desc">All major Indian banks</span></span>
+            </label>
+            <label class="pay-option">
+              <input type="radio" name="pay" value="cod">
+              <span><span class="pay-name">Cash on delivery</span><br><span class="pay-desc">Pay in cash or by UPI when the order arrives</span></span>
+            </label>
+          </div>
+
+          <button class="btn btn-primary btn-block" type="submit" id="place-order">Place order (demo)</button>
+        </form>
+      </section>
+
+      <aside class="summary-card" aria-label="Order summary">
+        <h3>Order summary</h3>
+        <div id="co-items" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;"></div>
+        <div id="co-summary"></div>
+        <p class="summary-note">Prices include all taxes</p>
+      </aside>
+    </div>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <script src="js/products.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    (function () {
+      function render() {
+        var s = cartSummary(sessionStorage.getItem("vw_coupon") || "");
+        var empty = s.items.length === 0;
+        document.getElementById("co-empty").hidden = !empty;
+        document.getElementById("co-layout").hidden = empty;
+        if (empty) return;
+
+        document.getElementById("co-items").innerHTML = s.items.map(function (i) {
+          var p = getProduct(i.id);
+          if (!p) return "";
+          return '<div class="summary-row" style="font-size: 13.5px;"><span>' +
+            p.name + " (" + i.size + ") × " + i.qty +
+            "</span><span>" + fmtINR(p.price * i.qty) + "</span></div>";
+        }).join("");
+
+        var rows = "";
+        rows += '<div class="summary-row"><span>MRP total</span><span>' + fmtINR(s.mrpTotal) + "</span></div>";
+        rows += '<div class="summary-row discount"><span>Discount</span><span>−' + fmtINR(s.baseDiscount + s.couponOff) + "</span></div>";
+        rows += '<div class="summary-row"><span>Shipping</span><span>' + (s.shipping === 0 ? "FREE" : fmtINR(s.shipping)) + "</span></div>";
+        rows += '<div class="summary-row total"><span>Total payable</span><span>' + fmtINR(s.total) + "</span></div>";
+        document.getElementById("co-summary").innerHTML = rows;
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        render();
+        document.getElementById("co-form").addEventListener("submit", function (ev) {
+          ev.preventDefault();
+          var required = ["f-name", "f-phone", "f-addr", "f-pin", "f-city", "f-state"];
+          var missing = required.filter(function (id) {
+            return !document.getElementById(id).value.trim();
+          });
+          if (missing.length) {
+            showToast("Please fill in all address fields");
+            document.getElementById(missing[0]).focus();
+            return;
+          }
+          if (!/^[6-9][0-9]{9}$/.test(document.getElementById("f-phone").value.trim())) {
+            showToast("Please enter a valid 10-digit mobile number");
+            document.getElementById("f-phone").focus();
+            return;
+          }
+          if (!/^[1-9][0-9]{5}$/.test(document.getElementById("f-pin").value.trim())) {
+            showToast("Please enter a valid 6-digit pincode");
+            document.getElementById("f-pin").focus();
+            return;
+          }
+          var orderId = "VW-" + String(Math.floor(100000 + Math.random() * 900000));
+          setCart([]);
+          sessionStorage.removeItem("vw_coupon");
+          document.getElementById("co-layout").hidden = true;
+          document.getElementById("order-id").textContent = orderId;
+          document.getElementById("co-success").hidden = false;
+          window.scrollTo(0, 0);
+          document.getElementById("success-title").focus();
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

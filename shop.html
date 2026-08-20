@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop — Vawehall</title>
+  <meta name="description" content="Shop the full Vawehall collection — kurtas, tees, shirts, dresses, denim and more.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🧵</text></svg>">
+</head>
+<body data-nav="shop">
+  <div id="app-header"></div>
+
+  <main class="container">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="index.html">Home</a><span class="sep">/</span><span id="crumb-here">Shop</span>
+    </nav>
+
+    <div class="shop-layout">
+      <aside class="filters" aria-label="Filters">
+        <details id="filters-box" open>
+          <summary>Filters</summary>
+          <div id="filter-groups"></div>
+          <button class="btn btn-ghost btn-block" id="clear-filters" type="button">Clear all filters</button>
+        </details>
+      </aside>
+
+      <section>
+        <div class="shop-toolbar">
+          <div>
+            <h1 class="section-title" id="shop-title" style="font-size: 28px;">All products</h1>
+            <p class="result-count" id="result-count"></p>
+          </div>
+          <label>
+            <span class="eyebrow" style="margin-right: 8px;">Sort by</span>
+            <select id="sort-select" aria-label="Sort products">
+              <option value="popular">Popularity</option>
+              <option value="new">Newest first</option>
+              <option value="price-asc">Price: low to high</option>
+              <option value="price-desc">Price: high to low</option>
+              <option value="rating">Customer rating</option>
+              <option value="discount">Better discount</option>
+            </select>
+          </label>
+        </div>
+        <div class="product-grid" id="shop-grid"></div>
+        <div class="empty-note" id="empty-note" hidden>
+          <p class="big">Nothing matches those filters</p>
+          <p>Try removing a filter or two — or browse everything instead.</p>
+          <p style="margin-top: 16px;"><button class="btn btn-primary" id="empty-clear" type="button">Show all products</button></p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <script src="js/products.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    (function () {
+      var params = new URLSearchParams(location.search);
+      var urlSearch = (params.get("search") || "").trim().toLowerCase();
+      var urlBadge = params.get("badge") || "";
+
+      var state = {
+        categories: new Set(params.get("category") ? [params.get("category")] : []),
+        types: new Set(params.get("type") ? [params.get("type")] : []),
+        colors: new Set(),
+        sizes: new Set(),
+        prices: new Set(),
+        sort: "popular"
+      };
+
+      var PRICE_BUCKETS = [
+        { key: "0-999", label: "Under ₹1,000", test: function (p) { return p.price < 1000; } },
+        { key: "1000-1999", label: "₹1,000 – ₹1,999", test: function (p) { return p.price >= 1000 && p.price < 2000; } },
+        { key: "2000-2999", label: "₹2,000 – ₹2,999", test: function (p) { return p.price >= 2000 && p.price < 3000; } },
+        { key: "3000+", label: "₹3,000 and above", test: function (p) { return p.price >= 3000; } }
+      ];
+
+      function uniq(arr) { return Array.from(new Set(arr)); }
+      var ALL_TYPES = uniq(PRODUCTS.map(function (p) { return p.type; })).sort();
+      var ALL_COLORS = uniq(PRODUCTS.reduce(function (a, p) { return a.concat(p.colors); }, [])).sort();
+      var ALL_SIZES = ["XS", "S", "M", "L", "XL", "XXL", "28", "30", "32", "34", "36"];
+
+      function checkbox(group, value, label, extra) {
+        var checked = state[group].has(value) ? " checked" : "";
+        return '<label class="filter-option">' +
+          '<input type="checkbox" data-group="' + group + '" data-value="' + value + '"' + checked + ">" +
+          (extra || "") + "<span>" + label + "</span></label>";
+      }
+
+      function renderFilters() {
+        var html = "";
+        html += '<div class="filter-group"><h4>Category</h4>' +
+          ["Men", "Women", "Unisex"].map(function (c) { return checkbox("categories", c, c); }).join("") + "</div>";
+        html += '<div class="filter-group"><h4>Type</h4>' +
+          ALL_TYPES.map(function (t) { return checkbox("types", t, t); }).join("") + "</div>";
+        html += '<div class="filter-group"><h4>Price</h4>' +
+          PRICE_BUCKETS.map(function (b) { return checkbox("prices", b.key, b.label); }).join("") + "</div>";
+        html += '<div class="filter-group"><h4>Size</h4>' +
+          ALL_SIZES.map(function (s) { return checkbox("sizes", s, s); }).join("") + "</div>";
+        html += '<div class="filter-group"><h4>Colour</h4>' +
+          ALL_COLORS.map(function (c) {
+            var sw = '<span class="swatch" style="background:' + (COLOR_HEX[c] || "#ccc") + '"></span>';
+            return checkbox("colors", c, c, sw);
+          }).join("") + "</div>";
+        document.getElementById("filter-groups").innerHTML = html;
+      }
+
+      function matches(p) {
+        if (urlBadge && p.badge !== urlBadge) return false;
+        if (urlSearch) {
+          var hay = (p.name + " " + p.type + " " + p.category + " " + p.fabric + " " + p.description + " " + p.colors.join(" ")).toLowerCase();
+          if (hay.indexOf(urlSearch) < 0) return false;
+        }
+        if (state.categories.size && !state.categories.has(p.category)) return false;
+        if (state.types.size && !state.types.has(p.type)) return false;
+        if (state.colors.size && !p.colors.some(function (c) { return state.colors.has(c); })) return false;
+        if (state.sizes.size && !p.sizes.some(function (s) { return state.sizes.has(s); })) return false;
+        if (state.prices.size) {
+          var ok = PRICE_BUCKETS.some(function (b) { return state.prices.has(b.key) && b.test(p); });
+          if (!ok) return false;
+        }
+        return true;
+      }
+
+      function sorted(list) {
+        var s = state.sort;
+        var out = list.slice();
+        if (s === "price-asc") out.sort(function (a, b) { return a.price - b.price; });
+        else if (s === "price-desc") out.sort(function (a, b) { return b.price - a.price; });
+        else if (s === "rating") out.sort(function (a, b) { return b.rating - a.rating; });
+        else if (s === "discount") out.sort(function (a, b) { return discountPct(b) - discountPct(a); });
+        else if (s === "new") out.sort(function (a, b) { return (b.badge === "New") - (a.badge === "New"); });
+        else out.sort(function (a, b) { return b.ratingCount - a.ratingCount; });
+        return out;
+      }
+
+      function pageTitle() {
+        if (urlSearch) return 'Search: "' + urlSearch + '"';
+        if (urlBadge === "New") return "New arrivals";
+        if (urlBadge) return urlBadge + "s";
+        if (state.categories.size === 1) return Array.from(state.categories)[0];
+        return "All products";
+      }
+
+      function render() {
+        var list = sorted(PRODUCTS.filter(matches));
+        var title = pageTitle();
+        document.getElementById("shop-title").textContent = title;
+        document.getElementById("crumb-here").textContent = title;
+        document.title = title + " — Vawehall";
+        document.getElementById("result-count").textContent =
+          list.length + (list.length === 1 ? " style" : " styles") + " found";
+        document.getElementById("shop-grid").innerHTML = list.map(renderCard).join("");
+        document.getElementById("empty-note").hidden = list.length !== 0;
+      }
+
+      function clearAll() {
+        state.categories.clear(); state.types.clear(); state.colors.clear();
+        state.sizes.clear(); state.prices.clear();
+        urlSearch = ""; urlBadge = "";
+        history.replaceState(null, "", "shop.html");
+        var headerSearch = document.querySelector('.header-search input');
+        if (headerSearch) headerSearch.value = "";
+        renderFilters();
+        render();
+      }
+
+      document.addEventListener("change", function (ev) {
+        var el = ev.target;
+        if (el.matches("[data-group]")) {
+          var set = state[el.getAttribute("data-group")];
+          var val = el.getAttribute("data-value");
+          if (el.checked) set.add(val); else set.delete(val);
+          render();
+        } else if (el.id === "sort-select") {
+          state.sort = el.value;
+          render();
+        }
+      });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        renderFilters();
+        render();
+        document.getElementById("clear-filters").addEventListener("click", clearAll);
+        document.getElementById("empty-clear").addEventListener("click", clearAll);
+        // On phones, start with the filter panel collapsed so products show first.
+        if (window.matchMedia("(max-width: 980px)").matches) {
+          document.getElementById("filters-box").removeAttribute("open");
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product — Vawehall</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🧵</text></svg>">
+</head>
+<body data-nav="shop">
+  <div id="app-header"></div>
+
+  <main class="container">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="index.html">Home</a><span class="sep">/</span>
+      <a href="shop.html">Shop</a><span class="sep">/</span>
+      <span id="crumb-name">Product</span>
+    </nav>
+
+    <div class="empty-note" id="not-found" hidden>
+      <p class="big">We couldn't find that product</p>
+      <p>It may have been removed from the demo catalog.</p>
+      <p style="margin-top: 16px;"><a class="btn btn-primary" href="shop.html">Browse all products</a></p>
+    </div>
+
+    <div class="pdp" id="pdp" hidden>
+      <div class="pdp-gallery">
+        <div class="pdp-main" id="pdp-main"></div>
+        <div class="pdp-thumbs" id="pdp-thumbs"></div>
+      </div>
+
+      <div class="pdp-info">
+        <span class="card-brand" id="pdp-brand"></span>
+        <h1 id="pdp-name"></h1>
+        <div id="pdp-rating"></div>
+        <div class="pdp-price" id="pdp-price"></div>
+        <p class="tax-note">Inclusive of all taxes</p>
+
+        <div class="opt-label"><span>Colour: <span id="color-name" style="text-transform: none;"></span></span></div>
+        <div class="color-row" id="color-row"></div>
+
+        <div class="opt-label">
+          <span>Select size</span>
+          <button class="link-btn" id="open-size-chart" type="button">Size chart</button>
+        </div>
+        <div class="size-row" id="size-row"></div>
+
+        <div class="pdp-ctas">
+          <button class="btn btn-primary" id="add-to-bag" type="button">Add to bag</button>
+          <button class="btn btn-outline" id="pdp-wish" type="button">♡ Wishlist</button>
+        </div>
+
+        <div class="pincode-box">
+          <h4>Check delivery date</h4>
+          <form id="pin-form">
+            <input type="text" id="pin-input" inputmode="numeric" maxlength="6" placeholder="Enter 6-digit pincode" aria-label="Pincode">
+            <button class="btn btn-dark" type="submit" style="padding: 9px 18px;">Check</button>
+          </form>
+          <p class="pin-msg" id="pin-msg" role="status"></p>
+        </div>
+
+        <div class="accordion">
+          <details open>
+            <summary>Product details</summary>
+            <div class="acc-body">
+              <p id="pdp-desc"></p>
+              <ul>
+                <li id="pdp-fabric"></li>
+                <li>Designed in India · Made in India</li>
+                <li id="pdp-sku"></li>
+              </ul>
+            </div>
+          </details>
+          <details>
+            <summary>Fabric care</summary>
+            <div class="acc-body">
+              <ul>
+                <li>Gentle machine wash cold with like colours</li>
+                <li>Do not bleach · Dry in shade</li>
+                <li>Warm iron; iron embroidery/prints inside-out</li>
+              </ul>
+            </div>
+          </details>
+          <details>
+            <summary>Shipping &amp; returns</summary>
+            <div class="acc-body">
+              <ul>
+                <li>Free shipping on orders above ₹999 (₹79 below that)</li>
+                <li>Dispatch in 24–48 hours; delivery in 3–7 days across India</li>
+                <li>7-day easy returns and size exchange with free doorstep pickup</li>
+                <li>Cash on delivery available</li>
+              </ul>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+
+    <section class="section" id="related-section" hidden>
+      <div class="section-head">
+        <p class="eyebrow">Complete the look</p>
+        <h2 class="section-title">You may also like</h2>
+      </div>
+      <div class="product-grid" id="related-grid"></div>
+    </section>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <div class="modal-backdrop" id="size-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="size-modal-title">
+      <button class="modal-close" id="close-size-chart" type="button" aria-label="Close size chart">×</button>
+      <h3 id="size-modal-title">Size chart</h3>
+      <p class="modal-sub">All measurements are garment measurements in inches. If you're between sizes, take the larger one.</p>
+      <div class="table-scroll" id="size-table"></div>
+    </div>
+  </div>
+
+  <script src="js/products.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    (function () {
+      var params = new URLSearchParams(location.search);
+      var product = getProduct(params.get("id"));
+      var chosenColor = null;
+      var chosenSize = null;
+
+      var APPAREL_CHART =
+        '<table class="simple"><thead><tr><th>Size</th><th>Chest</th><th>Length</th><th>Shoulder</th></tr></thead><tbody>' +
+        [["XS", 36, 26, 16], ["S", 38, 27, 17], ["M", 40, 28, 18], ["L", 42, 29, 19], ["XL", 44, 30, 20], ["XXL", 46, 31, 21]]
+          .map(function (r) { return "<tr><td>" + r.join("</td><td>") + "</td></tr>"; }).join("") +
+        "</tbody></table>";
+      var WAIST_CHART =
+        '<table class="simple"><thead><tr><th>Size</th><th>Waist</th><th>Hip</th><th>Inseam</th></tr></thead><tbody>' +
+        [["28", 28, 36, 30], ["30", 30, 38, 30], ["32", 32, 40, 31], ["34", 34, 42, 31], ["36", 36, 44, 32]]
+          .map(function (r) { return "<tr><td>" + r.join("</td><td>") + "</td></tr>"; }).join("") +
+        "</tbody></table>";
+
+      function renderGallery() {
+        document.getElementById("pdp-main").innerHTML = svgFor(product.type, chosenColor);
+        document.getElementById("pdp-thumbs").innerHTML = product.colors.map(function (c) {
+          return '<button class="pdp-thumb' + (c === chosenColor ? " active" : "") + '" data-color="' + c + '" type="button" aria-label="View in ' + c + '">' +
+            svgFor(product.type, c) + "</button>";
+        }).join("");
+        document.getElementById("color-row").innerHTML = product.colors.map(function (c) {
+          return '<button class="color-dot' + (c === chosenColor ? " active" : "") + '" data-color="' + c + '" type="button" ' +
+            'style="background:' + (COLOR_HEX[c] || "#ccc") + '" aria-label="Colour ' + c + '"></button>';
+        }).join("");
+        document.getElementById("color-name").textContent = chosenColor;
+      }
+
+      function renderWishBtn() {
+        var on = getWish().indexOf(product.id) >= 0;
+        var btn = document.getElementById("pdp-wish");
+        btn.innerHTML = '<span aria-hidden="true">' + (on ? "♥" : "♡") + "</span> " + (on ? "Wishlisted" : "Wishlist");
+        btn.setAttribute("aria-pressed", String(on));
+      }
+
+      function render() {
+        document.getElementById("pdp").hidden = false;
+        document.getElementById("related-section").hidden = false;
+        document.title = product.name + " — Vawehall";
+        document.getElementById("crumb-name").textContent = product.name;
+        document.getElementById("pdp-brand").textContent = BRAND + " · " + product.category;
+        document.getElementById("pdp-name").textContent = product.name;
+        document.getElementById("pdp-rating").innerHTML = ratingChip(product);
+        document.getElementById("pdp-price").innerHTML =
+          '<span class="price">' + fmtINR(product.price) + '</span>' +
+          '<span class="mrp">' + fmtINR(product.mrp) + '</span>' +
+          '<span class="off">(' + discountPct(product) + '% off)</span>';
+        document.getElementById("pdp-desc").textContent = product.description;
+        document.getElementById("pdp-fabric").textContent = "Fabric: " + product.fabric;
+        document.getElementById("pdp-sku").textContent = "Style code: " + product.id;
+        document.getElementById("size-row").innerHTML = product.sizes.map(function (s) {
+          return '<button class="size-pill" data-size="' + s + '" type="button" aria-pressed="false">' + s + "</button>";
+        }).join("");
+        document.getElementById("size-table").innerHTML =
+          product.sizes.indexOf("28") >= 0 ? WAIST_CHART : APPAREL_CHART;
+        renderGallery();
+        renderWishBtn();
+
+        var related = PRODUCTS.filter(function (p) {
+          return p.id !== product.id && (p.category === product.category || p.type === product.type);
+        }).slice(0, 4);
+        document.getElementById("related-grid").innerHTML = related.map(renderCard).join("");
+      }
+
+      document.addEventListener("click", function (ev) {
+        var colorBtn = ev.target.closest("[data-color]");
+        if (colorBtn) {
+          chosenColor = colorBtn.getAttribute("data-color");
+          var wasThumb = colorBtn.classList.contains("pdp-thumb");
+          renderGallery();
+          // Re-rendering destroys the clicked button — restore keyboard focus to its replacement.
+          var again = document.querySelector((wasThumb ? ".pdp-thumb" : ".color-dot") + '[data-color="' + chosenColor + '"]');
+          if (again) again.focus();
+          return;
+        }
+        var sizeBtn = ev.target.closest(".size-pill");
+        if (sizeBtn) {
+          chosenSize = sizeBtn.getAttribute("data-size");
+          document.querySelectorAll(".size-pill").forEach(function (b) {
+            b.classList.toggle("active", b === sizeBtn);
+            b.setAttribute("aria-pressed", String(b === sizeBtn));
+          });
+        }
+      });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        if (!product) {
+          document.getElementById("not-found").hidden = false;
+          document.title = "Product not found — Vawehall";
+          return;
+        }
+        chosenColor = product.colors[0];
+        render();
+
+        document.getElementById("add-to-bag").addEventListener("click", function () {
+          if (!chosenSize) { showToast("Please select a size first"); return; }
+          addToCart(product.id, chosenSize, chosenColor, 1);
+          showToast("Added to bag — " + product.name + " (" + chosenSize + ")");
+        });
+
+        document.getElementById("pdp-wish").addEventListener("click", function () {
+          toggleWish(product.id);
+          renderWishBtn();
+          showToast(getWish().indexOf(product.id) >= 0 ? "Added to wishlist" : "Removed from wishlist");
+        });
+
+        var modal = document.getElementById("size-modal");
+        var openBtn = document.getElementById("open-size-chart");
+        var closeBtn = document.getElementById("close-size-chart");
+        function openModal() {
+          modal.hidden = false;
+          document.body.style.overflow = "hidden";
+          closeBtn.focus();
+        }
+        function closeModal() {
+          if (modal.hidden) return;
+          modal.hidden = true;
+          document.body.style.overflow = "";
+          openBtn.focus();
+        }
+        openBtn.addEventListener("click", openModal);
+        closeBtn.addEventListener("click", closeModal);
+        modal.addEventListener("click", function (ev) { if (ev.target === modal) closeModal(); });
+        document.addEventListener("keydown", function (ev) {
+          if (modal.hidden) return;
+          if (ev.key === "Escape") closeModal();
+          if (ev.key === "Tab") {
+            // The close button is the dialog's only control — keep focus inside.
+            ev.preventDefault();
+            closeBtn.focus();
+          }
+        });
+
+        document.getElementById("pin-form").addEventListener("submit", function (ev) {
+          ev.preventDefault();
+          var pin = document.getElementById("pin-input").value.trim();
+          var msg = document.getElementById("pin-msg");
+          if (/^[1-9][0-9]{5}$/.test(pin)) {
+            msg.textContent = "Delivering to " + pin + " — expected in 3–5 days. COD available.";
+            msg.className = "pin-msg ok";
+          } else {
+            msg.textContent = "Please enter a valid 6-digit pincode.";
+            msg.className = "pin-msg err";
+          }
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# Local tooling config
+.claude/
+
+# Editors
+.vscode/
+.idea/
+
+# Node (if a build step is added later)
+node_modules/
+
+# Logs
+*.log
